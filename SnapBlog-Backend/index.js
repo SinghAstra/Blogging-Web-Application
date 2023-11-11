@@ -3,6 +3,7 @@ const  route = require('./routes/routes');
 const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const cors = require('cors');
 require('dotenv').config();
 
 mongoose.connect(process.env.dbURL).then(()=>{
