@@ -14,6 +14,9 @@ mongoose.connect(process.env.dbURL).then(()=>{
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.get('/',(req,res)=>{
+    res.json({"message":"SnapBlog API is up and running."})
+})
 app.use('/api', route);
 
 app.listen(3000,()=>{
