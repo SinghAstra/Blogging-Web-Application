@@ -10,6 +10,7 @@ mongoose.connect(process.env.dbURL).then(()=>{
 }).catch(err=>{
     console.log("Error while Connecting to Database");
 })
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use('/api', route);
