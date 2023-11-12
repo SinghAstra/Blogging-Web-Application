@@ -1,10 +1,11 @@
 import React from 'react'
 import Post from './Post'
+import ManWalkingAnimation from './ManWalkingAnimation'
 
 
 const PostList = ({ posts }) => {
     if (posts.length === 0) {
-        return <h2>Loading...</h2>
+        return <ManWalkingAnimation/>
     }
     return <div className='post-container'>
         {posts.map(post => {

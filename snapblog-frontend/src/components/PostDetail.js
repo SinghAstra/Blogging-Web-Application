@@ -14,8 +14,8 @@ const PostDetail = () => {
     }
   return (
     <div className='postDetail-container'>
-        <img src={post.image} alt='postDetail-image'/>
-        <h2>{post.title}</h2>
+        <img src={post.image} alt='postDetail'/>
+        <h1>{post.title}</h1>
         <p>{post.content}</p>
     </div>
   )

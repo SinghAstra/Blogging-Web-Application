@@ -1,6 +1,7 @@
 body {
   margin: 0;
   font-family: monospace;
+  background-color: rgb(197, 200, 197);
 }
 .navbar{
   background-color: black;
@@ -16,7 +17,6 @@ a{
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  background-color: rgb(197, 200, 197);
 }
 .post{
   width: 22vw;
@@ -42,9 +42,28 @@ a{
 }
 .postDetail-container{
   width: 80vw;
-  margin: auto;
+  margin: 16px auto;
 }
 .postDetail-container img{
-  width: 80%;
-  object-fit: cover;
+  max-width: 100%;
+  height: auto; 
+  display: block;
+  margin: 0 auto;
+}
+.postDetail-container h1{
+  font-size: 32px;
+}
+.postDetail-container p{
+  font-size: 16px;
+}
+.animation-container{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 999; 
 }
