@@ -6,13 +6,13 @@ import PostDetail from "./components/PostDetail";
 
 function App() {
   const [posts,setPosts] = useState([]);
-  // useEffect(()=>{
-  //   fetch("https://snapblog-api.onrender.com/api/post")
-  //   .then(res=>res.json())
-  //   .then(posts=>{
-  //     setPosts(posts.posts);
-  //   })
-  // },[])
+  useEffect(()=>{
+    fetch("https://snapblog-api.onrender.com/api/post")
+    .then(res=>res.json())
+    .then(posts=>{
+      setPosts(posts.posts);
+    })
+  },[])
   return (
     <>
       <Navbar />

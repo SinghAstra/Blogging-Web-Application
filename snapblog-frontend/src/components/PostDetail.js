@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useParams } from 'react-router-dom'
+import ManWalkingAnimation from './ManWalkingAnimation';
 
 const PostDetail = () => {
     const {id} = useParams();
@@ -10,7 +11,7 @@ const PostDetail = () => {
        setPost(res.post);
     })
     if(!post){
-        return <h2>Loading...</h2>
+        return <ManWalkingAnimation/>
     }
   return (
     <div className='postDetail-container'>
