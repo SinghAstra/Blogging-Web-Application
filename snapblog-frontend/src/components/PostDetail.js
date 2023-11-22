@@ -1,11 +1,15 @@
-import React, { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useContext, useEffect } from 'react'
+import { PostContext } from '../ContextPage'
+import { useParams } from 'react-router-dom';
 
 const PostDetail = () => {
-  const { id } = useParams();
-  const [post, setPost] = useState();
+  const {post,fetchPostById} = useContext(PostContext);
+  const {id} = useParams();
+  useEffect(()=>{
+    fetchPostById(id);
+  },[id])
   if (!post) {
-    return <h1>Post Not Found</h1>
+    return <h1>Loading....</h1>
   }
   return (
     <div>

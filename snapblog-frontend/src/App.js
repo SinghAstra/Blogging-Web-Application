@@ -11,7 +11,7 @@ function App() {
     <PostProvider>
       <Routes>
         <Route path="/" element={<PostList />}/>
-        {/* <Route path="/post/:id" element={<PostDetail/>}/> */}
+        <Route path="/post/:id" element={<PostDetail/>}/>
       </Routes>
     </PostProvider>
     </>
