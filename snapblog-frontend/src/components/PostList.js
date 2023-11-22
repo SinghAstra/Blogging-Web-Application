@@ -1,15 +1,21 @@
-import React from 'react'
-import Post from './Post'
-import ManWalkingAnimation from './ManWalkingAnimation'
+import React, { useContext, useEffect } from 'react'
+import PostCard from './PostCard'
+import { PostContext } from '../ContextPage';
 
 
-const PostList = ({ posts }) => {
-    if (posts.length === 0) {
-        return <ManWalkingAnimation/>
+const PostList = () => {
+    const {posts,fetchPosts} = useContext(PostContext);
+    
+    useEffect(() => {
+        fetchPosts();
+    }, [])
+
+    if(posts.length===0){
+        return <h1>Loading....</h1>
     }
-    return <div className='post-container'>
+    return <div>
         {posts.map(post => {
-            return <Post post={post} key={post._id}/>
+            return <PostCard post={post} key={post._id}/>
         })}
     </div>
 }
