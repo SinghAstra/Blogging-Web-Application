@@ -47,17 +47,24 @@ module.exports.updatePostById = (req, res) => {
         })
 }
 
-module.exports.deletePostById = (req,res) => {
+module.exports.deletePostById = (req, res) => {
     const id = req.params.id;
     Post.findByIdAndDelete(id)
-    .then(data=>{
-        res.json({
-            message:"Post Deleted Successfully",
-            data
+        .then(data => {
+            res.json({
+                message: "Post Deleted Successfully",
+                data
+            })
         })
-    })
-    .catch(err=>{
-        res.json({err})
-    })
+        .catch(err => {
+            res.json({ err })
+        })
+}
+
+
+module.exports.getAllPost = (req, res) => {
+    Post.find({})
+        .then(posts => { res.json({ posts }) })
+        .catch(err => { res.json(err) })
 }
 
