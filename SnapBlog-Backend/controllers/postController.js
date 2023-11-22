@@ -64,6 +64,7 @@ module.exports.deletePostById = (req, res) => {
 
 module.exports.getAllPost = (req, res) => {
     Post.find({})
+        .sort({ createdAt: -1 })
         .then(posts => { res.json({ posts }) })
         .catch(err => { res.json(err) })
 }
