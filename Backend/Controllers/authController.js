@@ -23,6 +23,32 @@ const registerUser = async(req,res) =>{
     })
 }
 
+const logInUser = async(req,res) =>{
+    const {email,password} = req.body;
+    const user = await User.findOne({email:email});
+    const comparePassword = bcrypt.compareSync(password,user.password);
+    if(comparePassword){
+        const payload = {
+            username : user.username,
+            email : user.email
+        }
+        const { JWT_SECRET_KEY,JWT_EXPIRE } = process.env;
+        const token = jwt.sign(payload ,JWT_SECRET_KEY, {expiresIn :JWT_EXPIRE} )
+        return res.status(200)
+        .json({
+            "success":true,
+            token
+        })
+    }else{
+        return res.status(200)
+        .json({
+            "success":false,
+            "message":"Invalid credentials."
+        })
+    }
+}
+
 module.exports = {
-    registerUser
+    registerUser,
+    logInUser
 }
