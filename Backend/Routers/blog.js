@@ -5,11 +5,11 @@ const blogController = require('../Controllers/blogController');
 
 router.post("/addBlog" ,blogController.addBlog)
 router.get("/getAllBlogs",blogController.getAllBlogs)
-// router.post("/:slug", )
+router.get("/:slug", blogController.getBlog)
+router.delete("/:slug/delete",blogController.deleteBlog)
 // router.post("/:slug/like",)
 // router.get("/editStory/:slug",)
 // router.put("/:slug/edit",)
-// router.delete("/:slug/delete",)
 
 
 module.exports = router
