@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const PostContext = React.createContext();
 
 export const PostProvider = (props) => {
     const [posts, setPosts] = useState([]);
     const [post, setPost] = useState();
+    const navigate = useNavigate();
 
     const fetchPosts = () => {
         fetch(process.env.REACT_APP_DB_URI)
@@ -39,11 +41,35 @@ export const PostProvider = (props) => {
             .then(data => {
                 console.log('Post created successfully:', data);
                 fetchPosts();
+                navigate('/');
             })
             .catch(error => {
                 console.log('There was a problem with the fetch operation:', error);
             });
 
+    }
+
+    const deletePostById = (id) => {
+        fetch(process.env.REACT_APP_DB_URI+"/"+id, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Post deleted successfully:', data);
+                fetchPosts();
+                navigate('/');
+            })
+            .catch(error => {
+                console.log('There was a problem with the fetch operation:', error);
+            });
     }
 
     return (
@@ -52,7 +78,8 @@ export const PostProvider = (props) => {
             fetchPosts,
             post,
             fetchPostById,
-            createPost
+            createPost,
+            deletePostById
         }}>
             {props.children}
         </PostContext.Provider>

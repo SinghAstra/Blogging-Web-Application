@@ -1,9 +1,9 @@
 const express = require('express');
-const  route = require('./routes/routes');
 const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const IndexRoute = require('./Routers/index');
 require('dotenv').config();
 
 mongoose.connect(process.env.dbURL).then(()=>{
@@ -11,13 +11,16 @@ mongoose.connect(process.env.dbURL).then(()=>{
 }).catch(err=>{
     console.log("Error while Connecting to Database");
 })
+
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
 app.get('/',(req,res)=>{
     res.json({"message":"SnapBlog API is up and running."})
 })
-app.use('/api', route);
+
+app.use('/api', IndexRoute);
 
 app.listen(3000,()=>{
     console.log("Listening on Port 3000");

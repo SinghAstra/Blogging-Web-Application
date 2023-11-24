@@ -1,18 +1,15 @@
 import React, { useContext, useState } from 'react'
 import { PostContext } from '../ContextPage';
-import { useNavigate } from 'react-router-dom';
 
 const CreatePost = () => {
     const [title,setTitle] = useState('');
     const [content,setContent] = useState('');
     const [image,setImage] = useState('');
     const {createPost} = useContext(PostContext);
-    const navigate = useNavigate();
 
     const handleSubmit = (e) =>{
         e.preventDefault();
         createPost({title,content,image});
-        navigate("/");
     }
     return (
     <form onSubmit={handleSubmit}>
