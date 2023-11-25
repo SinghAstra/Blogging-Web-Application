@@ -10,13 +10,14 @@ const registerUser = async (req, res) => {
     password = await bcrypt.hash(password, salt)
     const newUser = new User({ username, email, password });
     const { JWT_SECRET_KEY, JWT_EXPIRE } = process.env;
-    const payload = {
-        username: username,
-        email: email
-    }
-    const token = jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: JWT_EXPIRE })
     newUser.save()
-        .then(data => {
+    .then(user => {
+        const payload = {
+            id:user.id,
+            username: username,
+            email: email
+        }
+        const token = jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: JWT_EXPIRE })
             res.status(200)
                 .json({
                     "success": true,
@@ -31,6 +32,7 @@ const logInUser = async (req, res) => {
     const comparePassword = bcrypt.compareSync(password, user.password);
     if (comparePassword) {
         const payload = {
+            id:user.id,
             username: user.username,
             email: user.email
         }
@@ -132,9 +134,35 @@ const resetPassword = async (req,res) => {
     })
 }
 
+const getPrivateData = async (req,res) => {
+    const {JWT_SECRET_KEY} = process.env;
+    const authorization = req.headers.authorization
+    if( !(authorization && authorization.startsWith("Bearer"))){
+        return res.json({
+            "success":false,
+            "message":"You are not authorised to access this route."
+        })
+    }
+    const access_token = authorization.split(" ")[1]
+    const decoded = jwt.verify(access_token,JWT_SECRET_KEY);
+    if(!decoded){
+        return res.json({
+            "success":false,
+            "message":"You are not authorised to access this route."
+        })
+    }
+    const user = await User.findById(decoded.id);
+    return res.json({
+        "message":"success",
+        user
+    })
+
+}
+
 module.exports = {
     registerUser,
     logInUser,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    getPrivateData
 }

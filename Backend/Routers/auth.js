@@ -6,7 +6,7 @@ router.post("/register",authController.registerUser);
 router.post("/login",authController.logInUser);
 router.post("/forgotpassword",authController.forgotPassword);
 router.put("/resetpassword",authController.resetPassword);
-// router.get("/private",getAccessToRoute,getPrivateData)
+router.get("/private",authController.getPrivateData)
 
 
 
