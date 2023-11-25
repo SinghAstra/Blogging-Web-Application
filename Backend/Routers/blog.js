@@ -4,8 +4,8 @@ const blogController = require('../Controllers/blogController');
 
 
 router.post("/addBlog" ,blogController.addBlog)
-router.get("/getAllBlogs",blogController.getAllBlogs)
 router.get("/:slug", blogController.getBlog)
+router.get("/getAllBlogs",blogController.getAllBlogs)
 router.delete("/:slug/delete",blogController.deleteBlog)
 // router.post("/:slug/like",)
 // router.get("/editStory/:slug",)
