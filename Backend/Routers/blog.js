@@ -9,7 +9,7 @@ router.get("/:slug", blogController.getBlog)
 router.get("/editBlog/:slug",blogController.editBlogPage)
 router.put("/:slug/edit",blogController.updateBlog)
 router.delete("/:slug/delete",blogController.deleteBlog)
-// router.post("/:slug/like",)
+router.post("/:slug/like",blogController.likeBlog)
 
 
 module.exports = router

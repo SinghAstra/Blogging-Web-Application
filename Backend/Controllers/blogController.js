@@ -56,12 +56,12 @@ const getAllBlogs = (req, res) => {
 const getBlog = async (req, res) => {
     const { slug } = req.params;
     const blog = await Blog.findOne({ slug: slug }).populate("author");
-    if(!blog){
+    if (!blog) {
         return res.status(200).
-        json({
-            success: true,
-            "message": "Blog Not Found."
-        })
+            json({
+                success: true,
+                "message": "Blog Not Found."
+            })
     }
     return res.status(200).
         json({
@@ -70,7 +70,7 @@ const getBlog = async (req, res) => {
         })
 }
 
-const deleteBlog = async(req, res) => {
+const deleteBlog = async (req, res) => {
     const { slug } = req.params;
     const { JWT_SECRET_KEY } = process.env;
     const authorization = req.headers.authorization
@@ -90,8 +90,8 @@ const deleteBlog = async(req, res) => {
     }
     const user = await User.findById(decoded.id);
     req.user = user;
-    const blog = await Blog.findOne({ slug: slug,author:user.id });
-    if(!blog){
+    const blog = await Blog.findOne({ slug: slug, author: user.id });
+    if (!blog) {
         return res.json({
             "success": false,
             "message": "Either no such blog exists or you are not authorised to access this route."
@@ -104,8 +104,8 @@ const deleteBlog = async(req, res) => {
     })
 }
 
-const editBlogPage = async (req,res) => {
-    const {slug} = req.params;
+const editBlogPage = async (req, res) => {
+    const { slug } = req.params;
     const { JWT_SECRET_KEY } = process.env;
     const authorization = req.headers.authorization
     if (!(authorization && authorization.startsWith("Bearer"))) {
@@ -124,28 +124,27 @@ const editBlogPage = async (req,res) => {
     }
     const user = await User.findById(decoded.id);
     req.user = user;
-    const blog = await Blog.findOne({slug:slug,author:user.id}).populate("author");
-    if(!blog){
+    const blog = await Blog.findOne({ slug: slug, author: user.id }).populate("author");
+    if (!blog) {
         return res.json({
-            success:false,
-            message:"Either Blog does not exist or current User is not authorised."
+            success: false,
+            message: "Either Blog does not exist or current User is not authorised."
         })
     }
     return res.json({
-        success:true,
+        success: true,
         blog
     })
 }
 
-
-const updateBlog = async(req,res) => {
-    const {slug} = req.params;
+const updateBlog = async (req, res) => {
+    const { slug } = req.params;
     const { JWT_SECRET_KEY } = process.env;
-    const {title,content,image} = req.body;
-    if(!title||!content||!image){
+    const { title, content, image } = req.body;
+    if (!title || !content || !image) {
         return res.json({
-            "success":false,
-            "message":"Missing Credentials."
+            "success": false,
+            "message": "Missing Credentials."
         })
     }
     const authorization = req.headers.authorization
@@ -165,11 +164,11 @@ const updateBlog = async(req,res) => {
     }
     const user = await User.findById(decoded.id);
     req.user = user;
-    const blog = await Blog.findOne({slug:slug,author:user.id});
-    if(!blog){
+    const blog = await Blog.findOne({ slug: slug, author: user.id });
+    if (!blog) {
         return res.json({
-            "success":false,
-            "message":"Either No Such Blog Exists or You are not authorised."
+            "success": false,
+            "message": "Either No Such Blog Exists or You are not authorised."
         })
     }
     blog.title = title;
@@ -178,9 +177,55 @@ const updateBlog = async(req,res) => {
     blog.image = image;
     await blog.save();
     return res.json({
-        "success":true,
+        "success": true,
         blog
     })
+}
+
+const likeBlog = async (req, res) => {
+    const { slug } = req.params;
+    const { JWT_SECRET_KEY } = process.env;
+    const authorization = req.headers.authorization
+    if (!(authorization && authorization.startsWith("Bearer"))) {
+        return res.json({
+            "success": false,
+            "message": "You are not authorised to access this route."
+        })
+    }
+    const access_token = authorization.split(" ")[1]
+    const decoded = jwt.verify(access_token, JWT_SECRET_KEY);
+    if (!decoded) {
+        return res.json({
+            "success": false,
+            "message": "You are not authorised to access this route."
+        })
+    }
+    const user = await User.findById(decoded.id);
+    req.user = user;
+    const blog = await Blog.findOne({ slug: slug });
+    if (!blog) {
+        return res.json({
+            "success": false,
+            "message": "No such blog exist"
+        })
+    }
+    let blogLikes  = blog.likes.map(json => json._id.toString())
+    const userLikeStatus = blogLikes.includes(req.user.id);
+    if (userLikeStatus) {
+        blog.likes = blogLikes.filter(userId => {
+            return userId !== req.user.id
+        });
+        blog.likeCount = blog.likeCount - 1;
+    } else {
+        blog.likes.push(req.user.id);
+        blog.likeCount = blog.likeCount + 1;
+    }
+    await blog.save();
+    return res.json({
+        "success": true,
+        blog
+    })
+
 }
 
 module.exports = {
@@ -189,5 +234,6 @@ module.exports = {
     getBlog,
     deleteBlog,
     editBlogPage,
-    updateBlog
+    updateBlog,
+    likeBlog
 }
