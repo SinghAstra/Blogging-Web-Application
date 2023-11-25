@@ -87,9 +87,43 @@ const deleteBlog = (req, res) => {
     })
 }
 
+const editBlogPage = async (req,res) => {
+    const {slug} = req.params;
+    const { JWT_SECRET_KEY } = process.env;
+    const authorization = req.headers.authorization
+    if (!(authorization && authorization.startsWith("Bearer"))) {
+        return res.json({
+            "success": false,
+            "message": "You are not authorised to access this route."
+        })
+    }
+    const access_token = authorization.split(" ")[1]
+    const decoded = jwt.verify(access_token, JWT_SECRET_KEY);
+    if (!decoded) {
+        return res.json({
+            "success": false,
+            "message": "You are not authorised to access this route."
+        })
+    }
+    const user = await User.findById(decoded.id);
+    req.user = user;
+    const blog = await Blog.findOne({slug:slug,author:user.id}).populate("author");
+    if(!blog){
+        return res.json({
+            success:false,
+            message:"Either Blog does not exist or current User is not authorised."
+        })
+    }
+    return res.json({
+        success:true,
+        blog
+    })
+}
+
 module.exports = {
     addBlog,
     getAllBlogs,
     getBlog,
-    deleteBlog
+    deleteBlog,
+    editBlogPage
 }
