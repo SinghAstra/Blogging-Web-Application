@@ -120,10 +120,57 @@ const editBlogPage = async (req,res) => {
     })
 }
 
+
+const updateBlog = async(req,res) => {
+    const {slug} = req.params;
+    const { JWT_SECRET_KEY } = process.env;
+    const {title,content,image} = req.body;
+    if(!title||!content||!image){
+        return res.json({
+            "success":false,
+            "message":"Missing Credentials."
+        })
+    }
+    const authorization = req.headers.authorization
+    if (!(authorization && authorization.startsWith("Bearer"))) {
+        return res.json({
+            "success": false,
+            "message": "You are not authorised to access this route."
+        })
+    }
+    const access_token = authorization.split(" ")[1]
+    const decoded = jwt.verify(access_token, JWT_SECRET_KEY);
+    if (!decoded) {
+        return res.json({
+            "success": false,
+            "message": "You are not authorised to access this route."
+        })
+    }
+    const user = await User.findById(decoded.id);
+    req.user = user;
+    const blog = await Blog.findOne({slug:slug,author:user.id});
+    if(!blog){
+        return res.json({
+            "success":false,
+            "message":"Either No Such Blog Exists or You are not authorised."
+        })
+    }
+    blog.title = title;
+    blog.slug = slugify(title);
+    blog.content = content;
+    blog.image = image;
+    await blog.save();
+    return res.json({
+        "success":true,
+        blog
+    })
+}
+
 module.exports = {
     addBlog,
     getAllBlogs,
     getBlog,
     deleteBlog,
-    editBlogPage
+    editBlogPage,
+    updateBlog
 }
