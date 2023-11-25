@@ -1,6 +1,7 @@
 const User = require('../Models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require("crypto");
 
 const registerUser = async(req,res) =>{
     let {username,email,password} = req.body;
@@ -48,7 +49,34 @@ const logInUser = async(req,res) =>{
     }
 }
 
+
+const forgotPassword = async(req,res) => {
+    const {URI,EMAIL_USERNAME} = process.env;
+    const resetEmail = req.body.email;
+    const user = await User.findOne({email:resetEmail});
+    console.log("user is ",user);
+    if(!user){
+        return res.json({
+            "success":"false",
+            "message":"Invalid credentials. User Not Found."
+        })
+    }
+    const { RESET_PASSWORD_EXPIRE } = process.env
+    const randomHexString = crypto.randomBytes(20).toString("hex")
+    const resetPasswordToken = crypto.createHash("SHA256").update(randomHexString).digest("hex")
+    user.resetPasswordToken = resetPasswordToken
+    user.resetPasswordExpire = Date.now()+ parseInt(RESET_PASSWORD_EXPIRE)
+    await user.save();
+    const resetPasswordUrl = `${URI}/resetpassword?resetPasswordToken=${resetPasswordToken}`;
+    console.log("resetPasswordUrl is ",resetPasswordUrl);
+    return res.status(200)
+        .json({
+            user
+        })
+}
+
 module.exports = {
     registerUser,
-    logInUser
+    logInUser,
+    forgotPassword
 }
