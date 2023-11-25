@@ -50,7 +50,6 @@ const logInUser = async (req, res) => {
     }
 }
 
-
 const forgotPassword = async (req, res) => {
     const { URI, RESET_PASSWORD_EXPIRE , SMTP_HOST, SMTP_PORT, EMAIL_USERNAME, EMAIL_PASS} = process.env;
     const resetEmail = req.body.email;
@@ -66,7 +65,7 @@ const forgotPassword = async (req, res) => {
     user.resetPasswordToken = resetPasswordToken
     user.resetPasswordExpire = Date.now() + parseInt(RESET_PASSWORD_EXPIRE)
     await user.save();
-    const resetPasswordUrl = `${URI}/resetpassword?resetPasswordToken=${resetPasswordToken}`;
+    const resetPasswordUrl = `${URI}/api/auth/resetpassword?resetPasswordToken=${resetPasswordToken}`;
     try {
         let transporter = nodemailer.createTransport({
             host: SMTP_HOST,
@@ -108,8 +107,34 @@ const forgotPassword = async (req, res) => {
     }
 }
 
+const resetPassword = async (req,res) => {
+    const {resetPasswordToken} =  req.query;
+    let {password} = req.body;
+    const user = await User.findOne({
+        resetPasswordToken:resetPasswordToken,
+        resetPasswordExpire:{ $gt: Date.now() }
+    })
+    if(!user){
+        return res.json({
+            success:false,
+            message:"Invalid Credentials or Session Expired."
+        })
+    }
+    const salt = await bcrypt.genSalt(10);
+    password = await bcrypt.hash(password, salt);
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+    return res.json({
+        success:true,
+        message:"Password has been reset Successfully."
+    })
+}
+
 module.exports = {
     registerUser,
     logInUser,
-    forgotPassword
+    forgotPassword,
+    resetPassword
 }
