@@ -6,10 +6,16 @@ const nodemailer = require("nodemailer");
 
 const registerUser = async (req, res) => {
     let { username, email, password } = req.body;
+    const { JWT_SECRET_KEY, JWT_EXPIRE } = process.env;
+    if(!username||!email||!password){
+        return res.json({
+            "success":false,
+            "message":"Missing Credentials."
+        })
+    }
     const salt = await bcrypt.genSalt(10);
     password = await bcrypt.hash(password, salt)
     const newUser = new User({ username, email, password });
-    const { JWT_SECRET_KEY, JWT_EXPIRE } = process.env;
     newUser.save()
     .then(user => {
         const payload = {
@@ -28,7 +34,19 @@ const registerUser = async (req, res) => {
 
 const logInUser = async (req, res) => {
     const { email, password } = req.body;
+    if(!email||!password){
+        return res.json({
+            "success":false,
+            "message":"Missing Credentials."
+        })
+    }
     const user = await User.findOne({ email: email });
+    if(!user){
+        return res.json({
+            "success":false,
+            "message":"Invalid Credentials."
+        })
+    }
     const comparePassword = bcrypt.compareSync(password, user.password);
     if (comparePassword) {
         const payload = {
@@ -55,11 +73,17 @@ const logInUser = async (req, res) => {
 const forgotPassword = async (req, res) => {
     const { URI, RESET_PASSWORD_EXPIRE , SMTP_HOST, SMTP_PORT, EMAIL_USERNAME, EMAIL_PASS} = process.env;
     const resetEmail = req.body.email;
+    if(!resetEmail){
+        return res.json({
+            "success":false,
+            "message":"Missing Credentials."
+        })
+    }
     const user = await User.findOne({ email: resetEmail });
     if (!user) {
         return res.json({
             "success": "false",
-            "message": "Invalid credentials. User Not Found."
+            "message": "Invalid credentials."
         })
     }
     const randomHexString = crypto.randomBytes(20).toString("hex")
@@ -89,8 +113,7 @@ const forgotPassword = async (req, res) => {
             subject: " ✔ Reset Your Password  ✔",
             html: emailTemplate
         }
-        let info = await transporter.sendMail(mailOptions);
-        console.log(`Message send : ${info.messageId}`)
+        await transporter.sendMail(mailOptions);
         return res.status(200)
             .json({
                 success: true,
@@ -112,6 +135,12 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req,res) => {
     const {resetPasswordToken} =  req.query;
     let {password} = req.body;
+    if(!resetPasswordToken||!password){
+        return res.json({
+            "success":false,
+            "message":"Missing Credentials."
+        })
+    }
     const user = await User.findOne({
         resetPasswordToken:resetPasswordToken,
         resetPasswordExpire:{ $gt: Date.now() }
