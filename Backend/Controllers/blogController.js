@@ -70,20 +70,37 @@ const getBlog = async (req, res) => {
         })
 }
 
-const deleteBlog = (req, res) => {
+const deleteBlog = async(req, res) => {
     const { slug } = req.params;
-    Blog.findOneAndDelete({ slug: slug }).then(data => {
-        return res.status(200).
-            json({
-                success: true,
-                message: "Blog deleted succesfully "
-            })
-    }).catch(err => {
-        return res.
-            json({
-                success: false,
-                message: err
-            })
+    const { JWT_SECRET_KEY } = process.env;
+    const authorization = req.headers.authorization
+    if (!(authorization && authorization.startsWith("Bearer"))) {
+        return res.json({
+            "success": false,
+            "message": "You are not authorised to access this route."
+        })
+    }
+    const access_token = authorization.split(" ")[1]
+    const decoded = jwt.verify(access_token, JWT_SECRET_KEY);
+    if (!decoded) {
+        return res.json({
+            "success": false,
+            "message": "You are not authorised to access this route."
+        })
+    }
+    const user = await User.findById(decoded.id);
+    req.user = user;
+    const blog = await Blog.findOne({ slug: slug,author:user.id });
+    if(!blog){
+        return res.json({
+            "success": false,
+            "message": "Either no such blog exists or you are not authorised to access this route."
+        })
+    }
+    await blog.remove()
+    return res.json({
+        "success": true,
+        blog
     })
 }
 
