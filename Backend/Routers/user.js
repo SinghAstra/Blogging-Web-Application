@@ -4,7 +4,7 @@ const userController = require('../Controllers/userController');
 
 router.get('/profile',userController.getProfile)
 router.post("/editProfile",userController.editProfile)
-// router.put("/changePassword",)
+router.put("/changePassword",userController.changePassword)
 // router.post("/:slug/addStoryToReadList",)
 // router.get("/readList",)
 
