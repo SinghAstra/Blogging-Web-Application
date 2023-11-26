@@ -1,4 +1,5 @@
 const User = require('../Models/user');
+const Blog = require('../Models/blog');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -103,10 +104,57 @@ const changePassword = async (req,res) => {
     })
 }
 
-
+const addStoryToReadList = async (req,res) => {
+    const { JWT_SECRET_KEY } = process.env;
+    const authorization = req.headers.authorization
+    if (!(authorization && authorization.startsWith("Bearer"))) {
+        return res.json({
+            "success": false,
+            "message": "You are not authorised to access this route."
+        })
+    }
+    const access_token = authorization.split(" ")[1]
+    const decoded = jwt.verify(access_token, JWT_SECRET_KEY);
+    if (!decoded) {
+        return res.json({
+            "success": false,
+            "message": "You are not authorised to access this route."
+        })
+    }
+    const user = await User.findById(decoded.id);
+    req.user = user;
+    const {slug} = req.params;
+    const blog = await Blog.findOne({slug});
+    if(!blog){
+        return res.json({
+            success:false,
+            message:"No such blog found."
+        })
+    }
+    let blogReadList  = user.readList.map(json => json._id.toString())
+    const blogReadListStatus = blogReadList.includes(blog.id);
+    if (blogReadListStatus) {
+        user.readList = blogReadList.filter(blogId => {
+            return blogId !== blog.id
+        });
+        user.readListLength = user.readListLength - 1;
+    } else {
+        user.readList.push(blog.id);
+        user.readListLength = user.readListLength + 1;
+    }
+    await user.save();
+    const updatedStatus = !blogReadListStatus;
+    return res.json({
+        "success": true,
+        blog,
+        user,
+        updatedStatus
+    })
+}
 
 module.exports = {
     getProfile,
     editProfile,
-    changePassword
+    changePassword,
+    addStoryToReadList
 }
