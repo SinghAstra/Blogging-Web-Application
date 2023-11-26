@@ -31,6 +31,14 @@ const blogSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  comments:[{
+    type: mongoose.Schema.ObjectId,
+    ref: "User"
+  }],
+  commentCount:{
+    type: Number,
+    default: 0
+  },
   createdAt: {
     type: Date,
     default: Date.now()
