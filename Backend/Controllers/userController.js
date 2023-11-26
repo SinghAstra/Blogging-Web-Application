@@ -152,9 +152,40 @@ const addStoryToReadList = async (req,res) => {
     })
 }
 
+const readList = async(req,res) => {
+    const { JWT_SECRET_KEY } = process.env;
+    const authorization = req.headers.authorization
+    if (!(authorization && authorization.startsWith("Bearer"))) {
+        return res.json({
+            "success": false,
+            "message": "You are not authorised to access this route."
+        })
+    }
+    const access_token = authorization.split(" ")[1]
+    const decoded = jwt.verify(access_token, JWT_SECRET_KEY);
+    if (!decoded) {
+        return res.json({
+            "success": false,
+            "message": "You are not authorised to access this route."
+        })
+    }
+    const user = await User.findById(decoded.id);
+    req.user = user;
+    const readList = []
+    for (let index = 0; index < user.readList.length; index++) {
+        var blog = await Blog.findById(user.readList[index]).populate("author")
+        readList.push(blog)
+    }
+    return res.status(200).json({
+        success: true,
+        data: readList
+    })
+}
+
 module.exports = {
     getProfile,
     editProfile,
     changePassword,
-    addStoryToReadList
+    addStoryToReadList,
+    readList
 }
