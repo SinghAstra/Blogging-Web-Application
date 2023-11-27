@@ -3,54 +3,49 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const asyncErrorWrapper = require("express-async-handler")
 
-const registerUser = async (req, res) => {
+const registerUser = asyncErrorWrapper(async (req, res) => {
     let { username, email, password } = req.body;
     const { JWT_SECRET_KEY, JWT_EXPIRE } = process.env;
-    if(!username||!email||!password){
-        return res.json({
-            "success":false,
-            "message":"Missing Credentials."
-        })
-    }
     const salt = await bcrypt.genSalt(10);
     password = await bcrypt.hash(password, salt)
-    const newUser = new User({ username, email, password });
-    newUser.save()
-    .then(user => {
-        const payload = {
-            id:user.id,
-            username: username,
-            email: email
-        }
-        const token = jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: JWT_EXPIRE })
-            res.status(200)
-                .json({
-                    "success": true,
-                    token
-                })
+    const newUser = User.create({ username, email, password });
+    const payload = {
+        id: newUser.id,
+        username: username,
+        email: email
+    }
+    const token = jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: JWT_EXPIRE })
+    res.status(200)
+        .json({
+            "success": true,
+            "data": {
+                token
+            }
         })
-}
+})
+
 
 const logInUser = async (req, res) => {
     const { email, password } = req.body;
-    if(!email||!password){
+    if (!email || !password) {
         return res.json({
-            "success":false,
-            "message":"Missing Credentials."
+            "success": false,
+            "message": "Missing Credentials."
         })
     }
     const user = await User.findOne({ email: email });
-    if(!user){
+    if (!user) {
         return res.json({
-            "success":false,
-            "message":"Invalid Credentials."
+            "success": false,
+            "message": "Invalid Credentials."
         })
     }
     const comparePassword = bcrypt.compareSync(password, user.password);
     if (comparePassword) {
         const payload = {
-            id:user.id,
+            id: user.id,
             username: user.username,
             email: user.email
         }
@@ -71,12 +66,12 @@ const logInUser = async (req, res) => {
 }
 
 const forgotPassword = async (req, res) => {
-    const { URI, RESET_PASSWORD_EXPIRE , SMTP_HOST, SMTP_PORT, EMAIL_USERNAME, EMAIL_PASS} = process.env;
+    const { URI, RESET_PASSWORD_EXPIRE, SMTP_HOST, SMTP_PORT, EMAIL_USERNAME, EMAIL_PASS } = process.env;
     const resetEmail = req.body.email;
-    if(!resetEmail){
+    if (!resetEmail) {
         return res.json({
-            "success":false,
-            "message":"Missing Credentials."
+            "success": false,
+            "message": "Missing Credentials."
         })
     }
     const user = await User.findOne({ email: resetEmail });
@@ -100,7 +95,7 @@ const forgotPassword = async (req, res) => {
                 user: EMAIL_USERNAME,
                 pass: EMAIL_PASS
             },
-            secure:true
+            secure: true
         })
         const emailTemplate = `
         <h3 style="color : red "> Reset Your Password </h3>
@@ -125,30 +120,30 @@ const forgotPassword = async (req, res) => {
         user.resetPasswordExpire = undefined;
         await user.save();
         return res.status(200)
-        .json({
-            success: false,
-            message: "Email Not Send"
-        })
+            .json({
+                success: false,
+                message: "Email Not Send"
+            })
     }
 }
 
-const resetPassword = async (req,res) => {
-    const {resetPasswordToken} =  req.query;
-    let {password} = req.body;
-    if(!resetPasswordToken||!password){
+const resetPassword = async (req, res) => {
+    const { resetPasswordToken } = req.query;
+    let { password } = req.body;
+    if (!resetPasswordToken || !password) {
         return res.json({
-            "success":false,
-            "message":"Missing Credentials."
+            "success": false,
+            "message": "Missing Credentials."
         })
     }
     const user = await User.findOne({
-        resetPasswordToken:resetPasswordToken,
-        resetPasswordExpire:{ $gt: Date.now() }
+        resetPasswordToken: resetPasswordToken,
+        resetPasswordExpire: { $gt: Date.now() }
     })
-    if(!user){
+    if (!user) {
         return res.json({
-            success:false,
-            message:"Invalid Credentials or Session Expired."
+            success: false,
+            message: "Invalid Credentials or Session Expired."
         })
     }
     const salt = await bcrypt.genSalt(10);
@@ -158,31 +153,31 @@ const resetPassword = async (req,res) => {
     user.resetPasswordExpire = undefined;
     await user.save();
     return res.json({
-        success:true,
-        message:"Password has been reset Successfully."
+        success: true,
+        message: "Password has been reset Successfully."
     })
 }
 
-const getPrivateData = async (req,res) => {
-    const {JWT_SECRET_KEY} = process.env;
+const getPrivateData = async (req, res) => {
+    const { JWT_SECRET_KEY } = process.env;
     const authorization = req.headers.authorization
-    if( !(authorization && authorization.startsWith("Bearer"))){
+    if (!(authorization && authorization.startsWith("Bearer"))) {
         return res.json({
-            "success":false,
-            "message":"You are not authorised to access this route."
+            "success": false,
+            "message": "You are not authorised to access this route."
         })
     }
     const access_token = authorization.split(" ")[1]
-    const decoded = jwt.verify(access_token,JWT_SECRET_KEY);
-    if(!decoded){
+    const decoded = jwt.verify(access_token, JWT_SECRET_KEY);
+    if (!decoded) {
         return res.json({
-            "success":false,
-            "message":"You are not authorised to access this route."
+            "success": false,
+            "message": "You are not authorised to access this route."
         })
     }
     const user = await User.findById(decoded.id);
     return res.json({
-        "message":"success",
+        "message": "success",
         user
     })
 
