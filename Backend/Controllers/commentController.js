@@ -47,7 +47,30 @@ const addComment = async(req,res) => {
     })
 }
 
+const getAllCommentbyBlog = async(req,res) => {
+    const { slug } = req.params
+    const blog = await Blog.findOne({slug:slug})
+    if(!blog){
+        return res.json({
+            success:false,
+            message:"No Such Blog Found."
+        })
+    }
+    const commmentList =await Comment.find({
+        blog : blog.id 
+    }).populate({
+        path :"author"
+    }).sort("-createdAt")
+    return res.status(200)
+        .json({
+            success: true,
+            count: blog.commentCount,
+            data: commmentList
+        })
+}
+
 
 module.exports = {
-    addComment
+    addComment,
+    getAllCommentbyBlog
 }
