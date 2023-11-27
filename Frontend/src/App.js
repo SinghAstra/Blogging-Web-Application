@@ -1,21 +1,18 @@
-import PostList from "./components/PostList";
 import { Route, Routes } from "react-router-dom";
-import PostDetail from "./components/PostDetail";
-import { PostProvider } from "./ContextPage";
-import CreatePost from './pages/CreatePost';
+import Home from "./components/Home";
+import LogIn from "./components/LogIn";
+import Register from "./components/Register";
 
 
 function App() {
 
   return (
     <>
-    <PostProvider>
       <Routes>
-        <Route path="/" element={<PostList />}/>
-        <Route path="/post/:id" element={<PostDetail/>}/>
-        <Route path="/create-post" element={<CreatePost/>}/>
+        <Route path="/" element={<Home/>}/>
+        <Route path="/logIn" element={<LogIn/>}/>
+        <Route path="/register" element={<Register/>}/>
       </Routes>
-    </PostProvider>
     </>
   );
 }
