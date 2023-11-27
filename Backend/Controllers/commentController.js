@@ -117,9 +117,45 @@ const commentLike = async(req,res) => {
         })
 }
 
+const getCommentLikeStatus = async (req,res)=>{
+    const { JWT_SECRET_KEY } = process.env;
+    const authorization = req.headers.authorization
+    if (!(authorization && authorization.startsWith("Bearer"))) {
+        return res.json({
+            "success": false,
+            "message": "You are not authorised to access this route."
+        })
+    }
+    const access_token = authorization.split(" ")[1]
+    const decoded = jwt.verify(access_token, JWT_SECRET_KEY);
+    if (!decoded) {
+        return res.json({
+            "success": false,
+            "message": "You are not authorised to access this route."
+        })
+    }
+    const user = await User.findById(decoded.id);
+    req.user = user;
+    const { comment_id} =  req.params 
+    const comment = await Comment.findById(comment_id)
+    if(!comment){
+        return res.json({
+            success:false,
+            message:"No Such Comment Found."
+        })
+    }
+    const likeStatus = comment.likes.includes(user.id)
+    return res.status(200)
+    .json({
+        success: true,
+        likeStatus:likeStatus
+    })
+}
+
 
 module.exports = {
     addComment,
     getAllCommentbyBlog,
-    commentLike
+    commentLike,
+    getCommentLikeStatus
 }
