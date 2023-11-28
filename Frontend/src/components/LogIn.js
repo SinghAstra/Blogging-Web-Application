@@ -15,7 +15,6 @@ const LogIn = () => {
         `${process.env.REACT_APP_DB_URI}api/auth/login`,
         { email, password }
       );
-      console.log("data is ",data);
       localStorage.setItem("authToken", data.token);
       setTimeout(() => {
         navigate("/")

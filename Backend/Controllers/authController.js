@@ -79,24 +79,24 @@ const forgotPassword = async (req, res) => {
     const { URI, RESET_PASSWORD_EXPIRE, SMTP_HOST, SMTP_PORT, EMAIL_USERNAME, EMAIL_PASS } = process.env;
     const resetEmail = req.body.email;
     if (!resetEmail) {
-        return res.json({
+        return res.status(400).json({
             "success": false,
-            "message": "Missing Credentials."
+            error: "Missing Credentials."
         })
     }
     const user = await User.findOne({ email: resetEmail });
     if (!user) {
-        return res.json({
+        return res.status(400).json({
             "success": "false",
-            "message": "Invalid credentials."
+            error: "Invalid credentials."
         })
     }
     const randomHexString = crypto.randomBytes(20).toString("hex")
     const resetPasswordToken = crypto.createHash("SHA256").update(randomHexString).digest("hex")
     user.resetPasswordToken = resetPasswordToken
-    user.resetPasswordExpire = Date.now() + parseInt(RESET_PASSWORD_EXPIRE)
+    user.resetPasswordExpire = Date.now() +  60 * 60 * 1000;
     await user.save();
-    const resetPasswordUrl = `${URI}/api/auth/resetpassword?resetPasswordToken=${resetPasswordToken}`;
+    const resetPasswordUrl = `${URI}/resetpassword?resetPasswordToken=${resetPasswordToken}`;
     try {
         let transporter = nodemailer.createTransport({
             host: SMTP_HOST,
@@ -129,31 +129,32 @@ const forgotPassword = async (req, res) => {
         user.resetPasswordToken = undefined;
         user.resetPasswordExpire = undefined;
         await user.save();
-        return res.status(200)
+        return res.status(400)
             .json({
                 success: false,
-                message: "Email Not Send"
+                error: "Email Not Send"
             })
     }
 }
 
-const resetPassword = async (req, res) => {
+const resetPassword = asyncErrorWrapper(async (req, res) => {
     const { resetPasswordToken } = req.query;
     let { password } = req.body;
     if (!resetPasswordToken || !password) {
-        return res.json({
+        return res.status(400).json({
             "success": false,
-            "message": "Missing Credentials."
+            error: "Missing Credentials."
         })
     }
+    console.log("resetPasswordToken is ",resetPasswordToken);
     const user = await User.findOne({
         resetPasswordToken: resetPasswordToken,
         resetPasswordExpire: { $gt: Date.now() }
     })
     if (!user) {
-        return res.json({
+        return res.status(400).json({
             success: false,
-            message: "Invalid Credentials or Session Expired."
+            error: "Invalid Credentials or Session Expired."
         })
     }
     const salt = await bcrypt.genSalt(10);
@@ -166,7 +167,9 @@ const resetPassword = async (req, res) => {
         success: true,
         message: "Password has been reset Successfully."
     })
-}
+})
+
+
 
 const getPrivateData = async (req, res) => {
     const { JWT_SECRET_KEY } = process.env;
