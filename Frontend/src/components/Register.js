@@ -23,7 +23,7 @@ const Register = () => {
             return setError("Passwords do not match");
         }
         try {
-            const data  = await axios.post(
+            const {data}  = await axios.post(
               `${process.env.REACT_APP_DB_URI}api/auth/register`,
               {
                 username,
@@ -31,7 +31,6 @@ const Register = () => {
                 password,
               }
             );
-            console.log("data is ",data);
             localStorage.setItem("authToken", data.token);
             setTimeout(() => {
               navigate('/');

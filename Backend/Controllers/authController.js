@@ -7,10 +7,18 @@ const asyncErrorWrapper = require("express-async-handler")
 
 const registerUser = asyncErrorWrapper(async (req, res) => {
     let { username, email, password } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        return res.status(400).json({
+            success: false,
+            error: "Email is already registered.",
+        });
+    }
     const { JWT_SECRET_KEY, JWT_EXPIRE } = process.env;
     const salt = await bcrypt.genSalt(10);
     password = await bcrypt.hash(password, salt)
-    const newUser = User.create({ username, email, password });
+    const newUser = await User.create({ username, email, password });
     const payload = {
         id: newUser.id,
         username: username,
@@ -37,9 +45,9 @@ const logInUser = async (req, res) => {
     }
     const user = await User.findOne({ email: email });
     if (!user) {
-        return res.json({
+        return res.status(400).json({
             "success": false,
-            "message": "Invalid Credentials."
+            error: "Invalid Credentials."
         })
     }
     const comparePassword = bcrypt.compareSync(password, user.password);
@@ -54,13 +62,15 @@ const logInUser = async (req, res) => {
         return res.status(200)
             .json({
                 "success": true,
-                token
+                "data": {
+                    token
+                }
             })
     } else {
-        return res.status(200)
+        return res.status(400)
             .json({
                 "success": false,
-                "message": "Invalid credentials."
+                error: "Invalid credentials."
             })
     }
 }
