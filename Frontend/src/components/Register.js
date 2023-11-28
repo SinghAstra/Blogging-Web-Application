@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 
 const Register = () => {
     const [username, setUsername] = useState("")
@@ -8,7 +9,9 @@ const Register = () => {
     const [confirmPassword, setConfirmPassword] = useState("")
     const [error, setError] = useState("")
 
-    const handleRegister = (e) => {
+    const navigate = useNavigate();
+
+    const handleRegister = async(e) => {
         console.log("Inside the handle Register");
         e.preventDefault();
         if (password !== confirmPassword) {
@@ -19,6 +22,26 @@ const Register = () => {
             }, 8000);
             return setError("Passwords do not match");
         }
+        try {
+            const data  = await axios.post(
+              `${process.env.REACT_APP_DB_URI}api/auth/register`,
+              {
+                username,
+                email,
+                password,
+              }
+            );
+            console.log("data is ",data);
+            localStorage.setItem("authToken", data.token);
+            setTimeout(() => {
+              navigate('/');
+            }, 1800)
+          } catch (error) {
+            setError(error.response.data.error);
+            setTimeout(() => {
+              setError("");
+            }, 6000);
+          }
 
     }
     return (

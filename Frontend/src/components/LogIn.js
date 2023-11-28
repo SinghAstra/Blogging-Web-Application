@@ -8,7 +8,7 @@ const LogIn = () => {
         <input type='/email' placeholder='Email'/>
         <input type='/password' placeholder='password'/>
         <Link to="/forgotpassword">Forgot Password ?</Link>
-        <buttton>Log In</buttton>
+        <button>Log In</button>
     </div>
   )
 }
