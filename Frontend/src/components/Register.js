@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { AuthContext } from '../Context/AuthContext'
 
 const Register = () => {
     const [username, setUsername] = useState("")
@@ -8,11 +9,11 @@ const Register = () => {
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
     const [error, setError] = useState("")
+    const {setHasToken} = useContext(AuthContext);
 
     const navigate = useNavigate();
 
     const handleRegister = async(e) => {
-        console.log("Inside the handle Register");
         e.preventDefault();
         if (password !== confirmPassword) {
             setPassword("");
@@ -31,9 +32,8 @@ const Register = () => {
                 password,
               }
             );
-            console.log("data is ",data);
-            console.log("data.token is ",data.token);
             localStorage.setItem("authToken", data.token);
+            setHasToken(true);
             setTimeout(() => {
               navigate('/');
             }, 1800)

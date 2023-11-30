@@ -1,12 +1,14 @@
 import axios from 'axios';
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { AuthContext } from '../Context/AuthContext';
 
 const LogIn = () => {
   const [email,setEmail] = useState("");
   const [password,setPassword] = useState("");
   const [error,setError] = useState("");
   const navigate = useNavigate();
+  const {setHasToken} = useContext(AuthContext);
 
   const handleLogIn = async(e) =>{
     e.preventDefault();
@@ -16,6 +18,7 @@ const LogIn = () => {
         { email, password }
       );
       localStorage.setItem("authToken", data.token);
+      setHasToken(true);
       setTimeout(() => {
         navigate("/")
       }, 1800)

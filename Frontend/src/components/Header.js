@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { AuthContext } from '../Context/AuthContext';
 
 const Header = () => {
-  const hasToken = localStorage.getItem('authToken') ? true:false;
-  const [auth,setAuth] = useState(hasToken);
+
+  const {auth,activeUser} = useContext(AuthContext);
 
   return (
     <div className='navbar'>
@@ -12,6 +13,7 @@ const Header = () => {
         <>
         <Link to="/addStory">Add Story</Link>
         <Link to="/readList">ReadList</Link>
+        <p>Username : {activeUser.username}</p>
         </>:
         <>
         <Link to="/logIn">Log In</Link>
