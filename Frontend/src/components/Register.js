@@ -31,6 +31,8 @@ const Register = () => {
                 password,
               }
             );
+            console.log("data is ",data);
+            console.log("data.token is ",data.token);
             localStorage.setItem("authToken", data.token);
             setTimeout(() => {
               navigate('/');
