@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { AuthContext } from '../Context/AuthContext'
+import { AuthContext } from '../../Context/AuthContext'
 
 const Register = () => {
     const [username, setUsername] = useState("")

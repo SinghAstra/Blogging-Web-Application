@@ -1,9 +1,10 @@
 import { Route, Routes } from "react-router-dom";
 import Home from "./Components/Home";
-import LogIn from "./Components/LogIn";
-import Register from "./Components/Register";
-import ForgotPassword from "./Components/ForgotPassword";
-import ResetPassword from "./Components/ResetPassword";
+import LogIn from "./Components/AuthScreen/LogIn";
+import Register from "./Components/AuthScreen/Register";
+import ForgotPassword from "./Components/AuthScreen/ForgotPassword";
+import ResetPassword from "./Components/AuthScreen/ResetPassword";
+import AddBlog from "./Components/BlogScreen/AddBlog";
 
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<Home/>}/>
+        <Route path="/addBlog" element={<AddBlog/>}/>
         <Route path="/logIn" element={<LogIn/>}/>
         <Route path="/register" element={<Register/>}/>
         <Route path="/forgotpassword" element={<ForgotPassword/>}/>

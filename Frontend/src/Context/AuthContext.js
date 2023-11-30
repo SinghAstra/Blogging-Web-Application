@@ -10,15 +10,16 @@ const AuthContextProvider = props => {
 
     useEffect(() => {
         const controlAuth = async () => {
-            const config = {
-                headers: {
-                    "Content-Type": "application/json",
-                    authorization: `Bearer ${localStorage.getItem("authToken")}`,
-                }
-            };
             console.log("controlAuth is called.");
             try {
-                const response = await axios.get(`${process.env.REACT_APP_DB_URI}api/auth/private`, config);
+                const response = await axios.get(`${process.env.REACT_APP_DB_URI}api/auth/private`, 
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                    }
+                }
+                );
                 const data = response.data;
                 setActiveUser(data.user)
                 setAuth(true)

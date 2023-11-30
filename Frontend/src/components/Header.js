@@ -11,7 +11,7 @@ const Header = () => {
         <h1><Link to="/">Snap Blog</Link></h1>
         {auth?
         <>
-        <Link to="/addStory">Add Story</Link>
+        <Link to="/addBlog">Add Blog</Link>
         <Link to="/readList">ReadList</Link>
         <p>Username : {activeUser.username}</p>
         </>:
