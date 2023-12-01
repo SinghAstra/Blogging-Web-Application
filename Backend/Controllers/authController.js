@@ -28,9 +28,7 @@ const registerUser = asyncErrorWrapper(async (req, res) => {
     res.status(200)
         .json({
             "success": true,
-            "data": {
-                token
-            }
+            token
         })
 })
 
@@ -62,9 +60,7 @@ const logInUser = async (req, res) => {
         return res.status(200)
             .json({
                 "success": true,
-                "data": {
-                    token
-                }
+                token
             })
     } else {
         return res.status(400)
@@ -175,15 +171,21 @@ const getPrivateData = async (req, res) => {
     const { JWT_SECRET_KEY } = process.env;
     const authorization = req.headers.authorization
     if (!(authorization && authorization.startsWith("Bearer"))) {
-        return res.json({
+        return res.status(400).json({
             "success": false,
             "message": "You are not authorised to access this route."
         })
     }
     const access_token = authorization.split(" ")[1]
+    if(access_token=="null"){
+        return res.status(400).json({
+            "success": false,
+            "message": "You are not authorised to access this route."
+        })
+    }
     const decoded = jwt.verify(access_token, JWT_SECRET_KEY);
     if (!decoded) {
-        return res.json({
+        return res.status(400).json({
             "success": false,
             "message": "You are not authorised to access this route."
         })
@@ -193,6 +195,7 @@ const getPrivateData = async (req, res) => {
         "message": "success",
         user
     })
+    
 
 }
 

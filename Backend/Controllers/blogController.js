@@ -7,24 +7,24 @@ const addBlog = async (req, res) => {
     const { JWT_SECRET_KEY } = process.env;
     const authorization = req.headers.authorization
     if (!(authorization && authorization.startsWith("Bearer"))) {
-        return res.json({
+        return res.status(400).json({
             "success": false,
-            "message": "You are not authorised to access this route."
+            error: "You are not authorised to access this route."
         })
     }
     const access_token = authorization.split(" ")[1]
     const decoded = jwt.verify(access_token, JWT_SECRET_KEY);
     if (!decoded) {
-        return res.json({
+        return res.status(400).json({
             "success": false,
-            "message": "You are not authorised to access this route."
+            error: "You are not authorised to access this route."
         })
     }
     const user = await User.findById(decoded.id);
     req.user = user;
     const { title, content, image } = req.body;
     const slug = slugify(title);
-    const newBlog = new Blog({ title, content, image, slug, author: user.id });
+    const newBlog = new Blog({ title, content, image: "image", slug, author: user.id });
     newBlog.save().then(blog => {
         res.json({
             success: true,
@@ -39,6 +39,15 @@ const addBlog = async (req, res) => {
 }
 
 const getAllBlogs = (req, res) => {
+    let query = Blog.find();
+    if (req.query.search) {
+        console.log("inside the if statement");
+        const searchObject = {};
+        const regex = new RegExp(req.query.search, "i")
+        searchObject['title'] = regex
+        query = query.where(searchObject);
+        // return query
+    }
     Blog.find({})
         .then(blogs => {
             res.json({
@@ -209,7 +218,7 @@ const likeBlog = async (req, res) => {
             "message": "No such blog exist"
         })
     }
-    let blogLikes  = blog.likes.map(json => json._id.toString())
+    let blogLikes = blog.likes.map(json => json._id.toString())
     const userLikeStatus = blogLikes.includes(req.user.id);
     if (userLikeStatus) {
         blog.likes = blogLikes.filter(userId => {
