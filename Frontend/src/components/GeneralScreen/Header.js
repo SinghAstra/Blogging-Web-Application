@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AuthContext } from '../Context/AuthContext';
+import { AuthContext } from '../../Context/AuthContext';
+import SearchForm from './SearchForm';
 
 const Header = () => {
 
@@ -11,6 +12,7 @@ const Header = () => {
         <h1><Link to="/">Snap Blog</Link></h1>
         {auth?
         <>
+        <SearchForm/>
         <Link to="/addBlog">Add Blog</Link>
         <Link to="/readList">ReadList</Link>
         <p>Username : {activeUser.username}</p>
