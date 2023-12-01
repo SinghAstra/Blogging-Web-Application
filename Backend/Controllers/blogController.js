@@ -38,28 +38,19 @@ const addBlog = async (req, res) => {
     })
 }
 
-const getAllBlogs = (req, res) => {
+const getAllBlogs = async(req, res) => {
     let query = Blog.find();
     if (req.query.search) {
-        console.log("inside the if statement");
         const searchObject = {};
         const regex = new RegExp(req.query.search, "i")
         searchObject['title'] = regex
         query = query.where(searchObject);
-        // return query
     }
-    Blog.find({})
-        .then(blogs => {
-            res.json({
-                success: true,
-                blogs
-            })
-        }).catch(err => {
-            res.json({
-                success: false,
-                err
-            })
-        })
+    let blogs = await query;
+    res.json({
+        success:true,
+        blogs
+    })
 }
 
 const getBlog = async (req, res) => {
